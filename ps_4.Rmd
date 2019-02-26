@@ -1,0 +1,92 @@
+---
+title: "Problem Set #4"
+author: "Chris Onesti"
+date: "February 25, 2019"
+output: html_document
+---
+
+```{r setup, echo = FALSE, message = FALSE, warning = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(readr)
+library(gt)
+library(ggplot2)
+```
+
+## Question 1
+
+
+```{r echo = FALSE, message = FALSE, warning = FALSE}
+poll <- read_csv("ps_4_elections-poll-nc09-3.csv",
+            col_types =  cols(
+              .default = col_character(),
+              turnout_scale = col_double(),
+              turnout_score = col_double(),
+              w_LV = col_double(),
+              w_RV = col_double(),
+              final_weight = col_double(),
+              timestamp = col_datetime(format = "")))  
+
+q1a_setup <- poll %>% 
+  group_by(response) %>% 
+  filter(response == "Dem") %>%
+  count()
+
+q1a_answer <- q1a_setup$n[1]
+
+q1b_setup <- poll %>% 
+  group_by(response) %>% 
+  count()
+
+q1b_answer <- q1b_setup$n[3]-q1b_setup$n[4]
+
+q1c_setup <- poll %>%
+  filter(gender != gender_combined) %>% 
+  count()
+
+q1c_answer <- q1c_setup$n[1]
+
+q1d_setup <- poll %>%
+  filter(race_eth == "White", file_race_black != "White") %>% 
+  count()
+
+
+q1d_answer <- q1d_setup$n[1]
+
+q1e_setup_dems <- poll %>% 
+  select(response, timestamp) %>% 
+  filter(response == "Dem") %>%
+  arrange(timestamp)
+
+q1e_setup_reps <- poll %>% 
+  select(response, timestamp) %>% 
+  filter(response == "Rep") %>% 
+  arrange(timestamp)
+
+q1e_answer <- round(as.numeric(q1e_setup_reps$timestamp[1] - q1e_setup_dems$timestamp[1]))
+
+
+```
+
+There were `r q1a_answer` respondents who supported the Democratic candidate.
+
+There were `r q1b_answer` more respondents who favored the Republican candidate than who were Undecided.
+
+There are two gender variables (`gender` and `gender_combined`). There are `r q1c_answer` individuals for whom these variables have different values.
+
+There are `r q1d_answer` respondents listed as “White” under `race_eth` who are not listed as “White” under `file_race_black`.
+
+The first `response` of Dem came `r q1e_answer` minutes (rounded to the nearest minute) before the first `response` of Rep.
+
+
+
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
