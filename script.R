@@ -62,24 +62,60 @@ orig <- read_csv(file = "ps_4_elections-poll-nc09-3.csv",
                    final_weight = col_double(),
                    timestamp = col_datetime(format = ""))) %>%
   select(race_eth, response, final_weight) %>% 
-  filter(response %in% c("Dem", "Rep", "Und"), race_eth %in% c("Asian", "Black", "White", "Hispanic", "Other")) %>% 
+  filter(response %in% c("Dem", "Rep", 3, "Und"), race_eth %in% c("Asian", "Black", "White", "Hispanic", "Other")) %>% 
+  mutate(race_eth = fct_relevel(race_eth, c("White", "Black", "Hispanic", "Asian", "Other"))) %>% 
   group_by(response, race_eth) %>% 
   summarize(total = sum(final_weight)) %>%
-  spread(key = response, value = total)
-  orig[is.na(orig)] <- 0
-  orig %>% mutate(all = Rep + Dem + Und) %>% 
-  mutate(Dem = Dem / all, Rep = Rep/ all, Und = Und / all)
+  spread(key = response, value = total, fill = 0) %>% 
+  mutate(all = Rep + Dem + Und + `3`) %>%
+  mutate(Dem = Dem / all, Rep = Rep/ all, Und = Und / all) %>%
+  select(race_eth, Dem, Rep, Und)
 
+
+
+ orig %>% gt() %>% 
+  tab_header(
+    title = "Polling Results in North Carolina 9th Congressional District") %>% 
+   tab_source_note("Source: New York Times Upshot/Siena College 2018 live polls") %>%
+  
+  cols_label(
+    race_eth = "",
+    Dem = "DEM.",
+    Rep = "REP.",
+    Und = "UND."
+  ) %>%
+  
+  fmt_percent(columns = vars(Dem, Rep, Und),
+              decimals = 0) #%>% 
+  
+  # This little pipe is that incantation to take this pretty table, turn it
+  # into html, and send it to the md file we are creating. Future versions of
+  # gt will probably have a better way of doing this. Indeed, does anyone know
+  # of one?
+  
+  #as_raw_html() %>% as.character() %>% cat()
+
+
+
+
+
+
+
+
+
+
+  
 #Question 3
-poll$educ<-factor(poll$educ, levels = poll$educ[order(poll$final_weight)])
-poll %>% filter(educ != "[DO NOT READ] Refused") %>%
+poll %>%
+  filter(educ != "[DO NOT READ] Refused") %>%
+  mutate(educ = fct_relevel(educ, c("Grade school", "High school", "Some college or trade school", "Bachelors' degree", "Graduate or Professional Degree"))) %>%
   ggplot(aes(x = educ, y = final_weight)) + 
     geom_violin() + 
     coord_flip() +
     labs(title = "More Educated Matter Less in North Carolina 9th", subtitle = "Poll gives more weight to people who are less likely to participate in polls", caption = "New York Times Upshot/Siena College 2018 live polls") +
     ylab("Weight Given to Respondant in Calculating Poll Results") +
     xlab(NULL) +
-    geom_jitter(alpha = .4)
+    geom_jitter(alpha = .4, width = .2)
 
 #Question 4
 
