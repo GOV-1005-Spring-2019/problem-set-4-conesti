@@ -101,8 +101,6 @@ orig <- read_csv(file = "ps_4_elections-poll-nc09-3.csv",
   mutate(Dem = Dem / all, Rep = Rep/ all, Und = Und / all) %>%
   select(race_eth, Dem, Rep, Und) %>% na_if(0)
 
-
-
  orig %>% gt() %>% 
   tab_header(
     title = "Polling Results in North Carolina 9th Congressional District") %>% 
@@ -143,7 +141,6 @@ poll %>%
     xlab(NULL) +
     geom_jitter(alpha = .4, width = .2)
 
-
 ```
 
 ##Question 4
@@ -152,19 +149,20 @@ poll %>%
 
 num_rep <- sum(poll$partyid == "Republican")
 num_dem <- sum(poll$partyid == "Democrat")
+poll$response <- as.factor(poll$response)
 
 poll %>% 
   select(response, partyid, ager, final_weight) %>% 
   filter(partyid %in% c("Republican", "Democrat", "Independent (No party)")) %>% 
   group_by(response, partyid) %>%
   summarize(total = sum(final_weight)) %>%
-  ggplot(aes(x = partyid, y = total)) + geom_col(aes(fill = response)) +
+  ggplot(aes(x = partyid, y = total, color = response, fill = response)) + geom_col() +
+  scale_colour_manual(values = c(Rep = "red", Dem = "blue", Und = "gray", `3` = "black")) +
   coord_flip() +
   labs(title = "Republican Success Relies on Independent Vote", subtitle = "Despite a minority of registered voters, Republicans hold an edge with independent vote") + 
   xlab("Party Affiliation") + 
   ylab("Vote Count") + 
-  theme(legend.title = element_blank())
-
+  theme(legend.title = element_blank()) 
 
 ```
 
