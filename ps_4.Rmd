@@ -249,6 +249,8 @@ poll %>%
 ##Colleagues
 
 Chris M., Shaffi, Diego M., Debi G., Beau M., others
+
 Used code from class and from "advanced Googling"
+
 Attended Charlie's Study Hall and Dillon's Study Hall
 
