@@ -219,7 +219,9 @@ poll$partyid <- as.factor(poll$partyid)
 poll %>% 
   #Select response, partyid, and weights variable
   select(response, partyid, final_weight) %>%
-  #Reorders data in desired order
+  
+  #Reorders data in desired order.  This is done to make the data look cleaner by moving larger parts of the stack to the left while clustering the smaller segments of the stack to the right.
+  
   mutate(response = fct_relevel(response, c("Und", "3", "Dem", "Rep"))) %>% 
   #Filters leaving only main 3 parties as identities
   filter(partyid %in% c("Republican", "Democrat", "Independent (No party)")) %>% 
@@ -230,10 +232,18 @@ poll %>%
   
   #Plots responses to poll by party identification.  This will be useful to know where the source of each candidates votes are, and will visually demonstrate how many voters are still undecided in each political camp.
   
-  ggplot(aes(x = partyid, y = total, fill = response)) + geom_bar(stat = "identity") +
-  #Changes colors to current political conventions to make it more understandable 
+  ggplot(aes(x = partyid, y = total, fill = response)) + 
+  
+  #Chose stacked bar plot to display data because it can not only demonstrate the number of registered Republicans, Independents, and Democrats but also their breakdown of responses.
+  
+  geom_bar(stat = "identity") +
+  
+  #Changes colors to current political conventions to make it more understandable to someone who is used to seeing many charts like this.
+  
   scale_fill_manual(values = c(Rep = "red", Dem = "blue", Und = "gray", `3` = "black")) +
+  
   #Flips the coordinates to create a wider figure more suited to screen sizes and webpages 
+  
   coord_flip() +
   #Adds the title and subtitle labels
   labs(title = "Small Undecided Independent Vote Could Break Deadlock", subtitle = "Parties retain strong loyalty to candidates.  Independents evenly split.") + 
