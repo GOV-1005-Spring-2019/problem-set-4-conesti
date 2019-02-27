@@ -110,18 +110,21 @@ poll %>%
 
 #Question 4
 
+
 num_rep <- sum(poll$partyid == "Republican")
 num_dem <- sum(poll$partyid == "Democrat")
+poll$response <- as.factor(poll$response)
 
 poll %>% 
-  select(response, partyid, ager, final_weight) %>% 
+  select(response, partyid, final_weight) %>% 
   filter(partyid %in% c("Republican", "Democrat", "Independent (No party)")) %>% 
   group_by(response, partyid) %>%
   summarize(total = sum(final_weight)) %>%
-  ggplot(aes(x = partyid, y = total)) + geom_col(aes(fill = response)) +
+  ggplot(aes(x = partyid, y = total, fill = response)) + geom_bar(stat = "identity") +
+  scale_fill_manual(values = c(Rep = "red", Dem = "blue", Und = "gray", `3` = "black")) +
   coord_flip() +
-  labs(title = "Republican Success Relies on Independent Vote", subtitle = "Despite a minority of registered voters, Republicans hold an edge with independent vote") + 
+  labs(title = "Republican Success Relies on Independent Vote", subtitle = "Despite equal numbers of registered voters, Republicans hold an edge with independent vote") + 
   xlab("Party Affiliation") + 
   ylab("Vote Count") + 
-  theme(legend.title = element_blank())
+  theme(legend.title = element_blank()) 
 

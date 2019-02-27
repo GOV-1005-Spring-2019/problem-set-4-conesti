@@ -17,6 +17,7 @@ library(ggplot2)
 
 
 ```{r echo = FALSE, message = FALSE, warning = FALSE}
+#Imports poll data
 poll <- read_csv("ps_4_elections-poll-nc09-3.csv",
             col_types =  cols(
               .default = col_character(),
@@ -27,42 +28,68 @@ poll <- read_csv("ps_4_elections-poll-nc09-3.csv",
               final_weight = col_double(),
               timestamp = col_datetime(format = "")))  
 
-q1a_setup <- poll %>% 
+#Subsets data
+q1a_setup <- poll %>%
+  #Groups data by response
   group_by(response) %>% 
+  #Filters to only Democrat responses
   filter(response == "Dem") %>%
+  #Counts responses
   count()
 
+#Sets answer variable
 q1a_answer <- q1a_setup$n[1]
 
+
+#Subsets data
 q1b_setup <- poll %>% 
+  #Groups by response
   group_by(response) %>% 
+  #Counts data
   count()
 
+#Sets answer variable
 q1b_answer <- q1b_setup$n[3]-q1b_setup$n[4]
 
+#Subsets data
 q1c_setup <- poll %>%
+  #Filters data
   filter(gender != gender_combined) %>% 
+  #Counts data
   count()
 
+#Sets answer variable
 q1c_answer <- q1c_setup$n[1]
 
+#Subsets data
 q1d_setup <- poll %>%
+  #Filters only values in which the two variables are different
   filter(race_eth == "White", file_race_black != "White") %>% 
+  #Counts remaining data
   count()
 
-
+#Set answer variable
 q1d_answer <- q1d_setup$n[1]
 
+#Subsets data
 q1e_setup_dems <- poll %>% 
+  #selects only response and timestamp variables
   select(response, timestamp) %>% 
+  #Filters leaving only Democrat responses
   filter(response == "Dem") %>%
+  #Arranges data by time
   arrange(timestamp)
 
+#Subsets data
 q1e_setup_reps <- poll %>% 
+  #Selects response and timestamp variables
   select(response, timestamp) %>% 
+  #Filters leaving only Republican responses
   filter(response == "Rep") %>% 
+  #Arrange by timestamp
   arrange(timestamp)
 
+#Sets answer variable as the difference between two times
 q1e_answer <- round(as.numeric(q1e_setup_reps$timestamp[1] - q1e_setup_dems$timestamp[1]))
 
 
@@ -82,7 +109,9 @@ The first `response` of Dem came `r q1e_answer` minutes (rounded to the nearest 
 ## Question 2
 
 ```{r echo=FALSE}
+#Imports data from csv file
 orig <- read_csv(file = "ps_4_elections-poll-nc09-3.csv",
+                 #Sets default parameters
                  col_types =  cols(
                    .default = col_character(),
                    turnout_scale = col_double(),
@@ -91,37 +120,45 @@ orig <- read_csv(file = "ps_4_elections-poll-nc09-3.csv",
                    w_RV = col_double(),
                    final_weight = col_double(),
                    timestamp = col_datetime(format = ""))) %>%
+  #Select only race, response and weight variables
   select(race_eth, response, final_weight) %>% 
-  filter(response %in% c("Dem", "Rep", 3, "Und"), race_eth %in% c("Asian", "Black", "White", "Hispanic", "Other")) %>% 
+  #Filter leaving only races
+  filter(race_eth %in% c("Asian", "Black", "White", "Hispanic", "Other")) %>% 
+  #Reorders factors to one shown in example
   mutate(race_eth = fct_relevel(race_eth, c("White", "Black", "Hispanic", "Asian", "Other"))) %>% 
+  #Groups data by response and race
   group_by(response, race_eth) %>% 
+  #Summarizes data and counts by weight
   summarize(total = sum(final_weight)) %>%
+  #Spreads total value across different responses and sets NA values to 0
   spread(key = response, value = total, fill = 0) %>% 
+  #Calculates total selected voters
   mutate(all = Rep + Dem + Und + `3`) %>%
+  #Converts counts to percentages
   mutate(Dem = Dem / all, Rep = Rep/ all, Und = Und / all) %>%
-  select(race_eth, Dem, Rep, Und) %>% na_if(0)
+  #Selects only races and responses in main 3 parties
+  select(race_eth, Dem, Rep, Und) %>%
+  #Sets 0 values to NA
+  na_if(0)
 
- orig %>% gt() %>% 
-  tab_header(
-    title = "Polling Results in North Carolina 9th Congressional District") %>% 
-   tab_source_note("Source: New York Times Upshot/Siena College 2018 live polls") %>%
- #   fmt_missing(missing_text = "--") %>%
-  cols_label(
-    race_eth = "",
-    Dem = "DEM.",
-    Rep = "REP.",
-    Und = "UND."
-  ) %>%
+  #Selects data frame
+  orig %>% 
+    #Creates table
+    gt() %>% 
+    #Set header
+    tab_header(title = "Polling Results in North Carolina 9th Congressional District") %>%
+    #Set caption
+    tab_source_note("Source: New York Times Upshot/Siena College 2018 live polls") %>%
+    #Label the columns
+    cols_label(race_eth = "", Dem = "DEM.", Rep = "REP.", Und = "UND.") %>%
+    #Format as percent
+    fmt_percent(columns = vars(Dem, Rep, Und), decimals = 0) %>%
+    #Sets 0 values to NA
+    na_if(0) %>%
+    #Fill in NA values with dash lines
+    fmt_missing(columns = vars(Und), rows = 4) 
   
-  fmt_percent(columns = vars(Dem, Rep, Und),
-              decimals = 0) #%>% 
-  
-  # This little pipe is that incantation to take this pretty table, turn it
-  # into html, and send it to the md file we are creating. Future versions of
-  # gt will probably have a better way of doing this. Indeed, does anyone know
-  # of one?
-  
-  #as_raw_html() %>% as.character() %>% cat()
+    #as_raw_html() %>% as.character() %>% cat()
 
 
 ```
@@ -129,16 +166,25 @@ orig <- read_csv(file = "ps_4_elections-poll-nc09-3.csv",
 ##Question 3
 
 ```{r echo=FALSE}
-
+#Loads poll data
 poll %>%
+  #Filters out refusals
   filter(educ != "[DO NOT READ] Refused") %>%
+  #Reorders factors in education
   mutate(educ = fct_relevel(educ, c("Grade school", "High school", "Some college or trade school", "Bachelors' degree", "Graduate or Professional Degree"))) %>%
+  #Creates plot with education and weight
   ggplot(aes(x = educ, y = final_weight)) + 
+    #Sets the plot to violin
     geom_violin() + 
+    #Flips the coordinates
     coord_flip() +
+    #Sets title and subtitle labels
     labs(title = "More Educated Matter Less in North Carolina 9th", subtitle = "Poll gives more weight to people who are less likely to participate in polls", caption = "New York Times Upshot/Siena College 2018 live polls") +
+    #Labels the y axis
     ylab("Weight Given to Respondant in Calculating Poll Results") +
+    #Labels the x axis
     xlab(NULL) +
+    #Adds jitter layer on chart
     geom_jitter(alpha = .4, width = .2)
 
 ```
@@ -146,23 +192,33 @@ poll %>%
 ##Question 4
 
 ```{r echo=FALSE}
-
+#Stores the number of Republicans
 num_rep <- sum(poll$partyid == "Republican")
+#Stores the number of Democrats
 num_dem <- sum(poll$partyid == "Democrat")
+#Reformats response as factors
 poll$response <- as.factor(poll$response)
+#Reformats partyid as factors
+poll$partyid <- as.factor(poll$partyid)
 
+#Starts with data from poll
 poll %>% 
-  select(response, partyid, ager, final_weight) %>% 
+  #Select response, partyid, and weights variable
+  select(response, partyid, final_weight) %>%
+  #Reorders data in desired order
+  mutate(response = fct_relevel(response, c("Und", "3", "Dem", "Rep"))) %>% 
+  #
   filter(partyid %in% c("Republican", "Democrat", "Independent (No party)")) %>% 
   group_by(response, partyid) %>%
   summarize(total = sum(final_weight)) %>%
-  ggplot(aes(x = partyid, y = total, color = response, fill = response)) + geom_col() +
-  scale_colour_manual(values = c(Rep = "red", Dem = "blue", Und = "gray", `3` = "black")) +
+  ggplot(aes(x = partyid, y = total, fill = response)) + geom_bar(stat = "identity") +
+  scale_fill_manual(values = c(Rep = "red", Dem = "blue", Und = "gray", `3` = "black")) +
   coord_flip() +
-  labs(title = "Republican Success Relies on Independent Vote", subtitle = "Despite a minority of registered voters, Republicans hold an edge with independent vote") + 
-  xlab("Party Affiliation") + 
+  labs(title = "Small Undecided Independent Vote Could Break Deadlock", subtitle = "Parties retain strong loyalty to candidates.  Independents evenly split.") + 
+  xlab("") + 
   ylab("Vote Count") + 
-  theme(legend.title = element_blank()) 
+  theme(legend.title = element_blank())
+
 
 ```
 
