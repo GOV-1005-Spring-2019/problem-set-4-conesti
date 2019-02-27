@@ -159,7 +159,7 @@ orig <- read_csv(file = "ps_4_elections-poll-nc09-3.csv",
     fmt_missing(columns = vars(Und), rows = 4) 
   
     #as_raw_html() %>% as.character() %>% cat()
-
+  
 
 ```
 
@@ -207,22 +207,34 @@ poll %>%
   select(response, partyid, final_weight) %>%
   #Reorders data in desired order
   mutate(response = fct_relevel(response, c("Und", "3", "Dem", "Rep"))) %>% 
-  #
+  #Filters leaving only main 3 parties as identities
   filter(partyid %in% c("Republican", "Democrat", "Independent (No party)")) %>% 
+  #Groups data by response and party identification
   group_by(response, partyid) %>%
+  #Summarizes data and counts using weights
   summarize(total = sum(final_weight)) %>%
+  
+  #Plots responses to poll by party identification.  This will be useful to know where the source of each candidates votes are, and will visually demonstrate how many voters are still undecided in each political camp.
+  
   ggplot(aes(x = partyid, y = total, fill = response)) + geom_bar(stat = "identity") +
+  #Changes colors to current political conventions to make it more understandable 
   scale_fill_manual(values = c(Rep = "red", Dem = "blue", Und = "gray", `3` = "black")) +
+  #Flips the coordinates to create a wider figure more suited to screen sizes and webpages 
   coord_flip() +
+  #Adds the title and subtitle labels
   labs(title = "Small Undecided Independent Vote Could Break Deadlock", subtitle = "Parties retain strong loyalty to candidates.  Independents evenly split.") + 
-  xlab("") + 
+  #Adds x axis label and sets it to nothing
+  xlab(NULL) + 
+  #Sets y axis label
   ylab("Vote Count") + 
+  #Removes the legend on the side
   theme(legend.title = element_blank())
-
 
 ```
 
 ##Colleagues
 
-Chris M., Shaffi, Diego M., Debi G., Beau M.
+Chris M., Shaffi, Diego M., Debi G., Beau M., others
+Used code from class and from "advanced Googling"
+Attended Charlie's Study Hall and Dillon's Study Hall
 
