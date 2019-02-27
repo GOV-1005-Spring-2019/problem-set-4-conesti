@@ -258,7 +258,7 @@ poll %>%
 
 ##Colleagues
 
-Chris M., Shaffi, Diego M., Debi G., Beau M., others
+Chris M., Shafi, Diego M., Debi G., Beau M., others
 
 Used code from class and from "advanced Googling"
 
