@@ -20,12 +20,19 @@ library(ggplot2)
 #Imports poll data
 poll <- read_csv("ps_4_elections-poll-nc09-3.csv",
             col_types =  cols(
+              #Sets default column character
               .default = col_character(),
+              #Sets turnout scale to double format
               turnout_scale = col_double(),
+              #Sets turnout score to double format
               turnout_score = col_double(),
+              #Sets w_LV to double format
               w_LV = col_double(),
+              #Sets w_RV to double format
               w_RV = col_double(),
+              #Sets final weight to double format
               final_weight = col_double(),
+              #Set timestamp variable to datetime format
               timestamp = col_datetime(format = "")))  
 
 #Subsets data
@@ -113,12 +120,19 @@ The first `response` of Dem came `r q1e_answer` minutes (rounded to the nearest 
 orig <- read_csv(file = "ps_4_elections-poll-nc09-3.csv",
                  #Sets default parameters
                  col_types =  cols(
+                   #Set default column format to character
                    .default = col_character(),
+                   #Set turnout scale to double
                    turnout_scale = col_double(),
+                   #Set turnout score to double
                    turnout_score = col_double(),
+                   #Set w_LV to double formatted column
                    w_LV = col_double(),
+                   #Set w_RV to double formatted column
                    w_RV = col_double(),
+                   #Set final weight column to double format
                    final_weight = col_double(),
+                   #Set timestamp to date time format
                    timestamp = col_datetime(format = ""))) %>%
   #Select only race, response and weight variables
   select(race_eth, response, final_weight) %>% 
